@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuth } from "@/context/AuthContext";
 import {
     Container,
     Box,
@@ -15,10 +16,12 @@ import { useState } from "react";
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const router = useRouter();
+    const { login } = useAuth();
+
     
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch('/api/auth', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
@@ -26,7 +29,7 @@ import { useState } from "react";
 
         if (res.ok) {
             const { token } = await res.json();
-            localStorage.setItem('token', token);
+            login(token);
             router.push('/dashboard');
         } else {
             alert('Usuario o contraseña incorrectos');
