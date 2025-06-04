@@ -1,23 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DocumentProcessorServiceClient } from '@google-cloud/documentai';
-import { Readable } from 'stream';
 
-const PROJECT_ID = '987542019259';
-const LOCATION = 'us'; // o 'eu', depende de dónde esté tu processor
-const PROCESSOR_ID = 'a230386c5752986a';
-
-// Inicializa el cliente
-const client = new DocumentProcessorServiceClient({
-  keyFilename: 'config/mita-app-document-ai-key.json', // asegúrate de no subir esto a git
-});
-
-async function bufferFromReadable(readable: Readable): Promise<Buffer> {
-  const chunks: Buffer[] = [];
-  for await (const chunk of readable) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-  }
-  return Buffer.concat(chunks);
+const credentials = {
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+    project_id: process.env.GOOGLE_PROJECT_ID,
+    private_key_id: process.env.GOOGLE_PRIVATE_KEY_ID,
+    private_key: process.env.GOOGLE_PRIVATE_KEY
 }
+// Inicializa el cliente
+const client = new DocumentProcessorServiceClient({credentials});
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -30,7 +22,7 @@ export async function POST(req: NextRequest) {
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
 
-  const name = `projects/${PROJECT_ID}/locations/${LOCATION}/processors/${PROCESSOR_ID}`;
+  const name = `projects/${process.env.GOOGLE_DOCUMENT_AI_PROJECT_ID}/locations/${process.env.GOOGLE_EXPENSES_PROCESSOR_LOCATION}/processors/${process.env.GOOGLE_EXPENSES_PROCESSOR_ID}`;
 
   const request = {
     name,
