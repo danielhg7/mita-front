@@ -1,19 +1,5 @@
+import { Expense } from "@/interfaces/Expense";
 import { Box, Typography, Paper, Divider } from "@mui/material";
-
-interface Item {
-    confidence: number,
-    id: string,
-    mentionId: string,
-    mentionText: string,
-    normalizedValue: string,
-    properties: Item[],
-    type: string
-}
-
-interface Expense {
-    description: Item,
-    amount: Item
-}
 
 interface ParsedResultProps {
     items: Expense[]

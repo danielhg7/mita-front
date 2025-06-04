@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { DocumentProcessorServiceClient } from '@google-cloud/documentai';
+import { DocumentProcessorServiceClient, protos } from '@google-cloud/documentai';
+
+type Document = protos.google.cloud.documentai.v1.IDocument;
+type Item = protos.google.cloud.documentai.v1.Document.IEntity
 
 const credentials = {
     client_id: process.env.GOOGLE_CLIENT_ID,
@@ -36,20 +39,24 @@ export async function POST(req: NextRequest) {
 
   const { document } = result;
 
+  if (!document) {
+    return NextResponse.json({ error: 'No document returned by Document AI' }, { status: 500 });
+  }
+
   return NextResponse.json(transformData(document));
 }
 
-function transformData(document: any) {
+function transformData(document: Document) {
 
-    const transformedData = document.entities.map((item: any) => {
+    const transformedData = document?.entities?.map((item: Item) => {
 
-        if(item.properties.length > 0) {
+        if(item && item.properties && item.properties.length > 0) {
             const description = item.properties.find(
-                (property: any) => property.type === 'line_item/description'
+                (property: Item) => property.type === 'line_item/description'
             )
     
             const amount = item.properties.find(
-                (property: any) => property.type === 'line_item/amount'
+                (property: Item) => property.type === 'line_item/amount'
             )
 
             if(description && amount) {
@@ -59,7 +66,7 @@ function transformData(document: any) {
                 }
             }
         }
-    }).filter((item: any) => item);
+    }).filter((item: unknown) => item);
 
     return transformedData;
 }
